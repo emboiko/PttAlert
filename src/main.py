@@ -70,7 +70,6 @@ class PttAlert:
 
     def on_press(self, key):
         if key == keyboard.Key.ctrl_r:
-            print("Quitting...")
             self.win.destroy()
             exit(0)
 
