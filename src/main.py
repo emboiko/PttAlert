@@ -10,7 +10,7 @@ from sys import argv
 # Quick and dirty | Make sure Hux keeps his mic cued during raid ;)
 
 class PttAlert:
-    def __init__(self, threshold=0):
+    def __init__(self, threshold=0, window_width="350", window_height="225"):
         # Keyboard
         self.ptt_key = None
 
@@ -20,10 +20,12 @@ class PttAlert:
         self.threshold = int(threshold)
 
         # Tk Window
+        self.window_width = window_width
+        self.window_height = window_height
         self.win = Tk()
         self.win.overrideredirect(True)
         self.win.attributes("-topmost", True)
-        self.win.geometry("450x300")
+        self.win.geometry(f"{self.window_width}x{self.window_height}")
         self.win.update() 
         width_offset = int(
             (self.win.winfo_screenwidth() / 2) - (self.win.winfo_width() / 2)
@@ -38,9 +40,30 @@ class PttAlert:
         self.message_label = Label(
             self.win, 
             bg="red",
-            font=("Arial", 30)
+            font=("Arial", 24)
         )
         self.message_label.grid()
+        self.win.bind("<ButtonPress-1>", self.start_move)
+        self.win.bind("<ButtonRelease-1>", self.stop_move)
+        self.win.bind("<B1-Motion>", self.do_move)
+
+
+    def start_move(self, event):
+        self.x = event.x
+        self.y = event.y
+
+
+    def stop_move(self, event):
+        self.x = None
+        self.y = None
+
+
+    def do_move(self, event):
+        deltax = event.x - self.x
+        deltay = event.y - self.y
+        x = self.win.winfo_x() + deltax
+        y = self.win.winfo_y() + deltay
+        self.win.geometry(f"+{x}+{y}")
 
 
     def init_input_stream(self):
@@ -87,7 +110,9 @@ class PttAlert:
 
 def main():
     alerter = PttAlert(
-        threshold=argv[1]
+        threshold=argv[1],
+        window_width=argv[2],
+        window_height=argv[3]
     )
     thread = Thread(target=alerter.init_input_stream, daemon=True)
     thread.start()
