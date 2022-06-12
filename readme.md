@@ -2,10 +2,6 @@
 
 <h3>PttAlert</h3>
 
-A "gentle" reminder to press push-to-talk ;)
-
-<img src="https://i.imgur.com/RCiSvU4.png"><img/>
-
 </div>
 
 ### Installation for noobs:

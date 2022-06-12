@@ -1,6 +1,7 @@
 from sounddevice import Stream
 from numpy import linalg
 from pynput import keyboard
+from pynput.keyboard import Controller
 from tkinter import Tk, Label
 from threading import Thread
 from sys import argv
@@ -13,10 +14,10 @@ class PttAlert:
     def __init__(self, threshold=0, window_width="350", window_height="225"):
         # Keyboard
         self.ptt_key = None
+        self.keyboard_controller = Controller()
 
         # Microphone
         self.level = None
-        self.cued = False
         self.threshold = int(threshold)
 
         # Tk Window
@@ -81,14 +82,13 @@ class PttAlert:
             self.message_label.configure(text="REGISTER PTT KEY")
             return
         else:
-            self.message_label.configure(text=f"PUSH TO TALK\n NOT CUED\n\n{self.ptt_key}")
-
-        if ((self.level > self.threshold) and (not self.cued)):
-            self.win.configure(bg="red")
-            self.win.attributes("-alpha", 1)
-        else:
             self.win.attributes("-alpha", 0)
             self.win.configure(bg="black")
+
+        if (self.level > self.threshold):
+            self.keyboard_controller.press(self.ptt_key)
+        else:
+            self.keyboard_controller.release(self.ptt_key)
 
 
     def on_press(self, key):
@@ -96,16 +96,8 @@ class PttAlert:
             self.win.destroy()
             exit(0)
 
-        if key == self.ptt_key:
-            self.cued = True
-
         if not self.ptt_key:
             self.ptt_key = key
-
-
-    def on_release(self, key):
-        if key == self.ptt_key:
-            self.cued = False
 
 
 def main():
